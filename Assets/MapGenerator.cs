@@ -265,7 +265,6 @@ public class MapGenerator : MonoBehaviour
         float offset = (float)(t % period) / period;
         if (offset == 0) UpdateGrass(index + 3);
 
-        Debug.Log(index);
         Vector2 r0 = (1 - offset) * dataset[index] + offset * dataset[index + 1];
         Vector2 r1 = (1 - offset) * dataset[index + 1] + offset * dataset[index + 2];
         Vector2 r2 = (1 - offset) * dataset[index + 2] + offset * dataset[index + 3];

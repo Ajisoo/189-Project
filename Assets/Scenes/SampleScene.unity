@@ -736,6 +736,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1782606647}
   - component: {fileID: 1782606648}
+  - component: {fileID: 1782606649}
   m_Layer: 0
   m_Name: Car
   m_TagString: Untagged
@@ -773,3 +774,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   grass: {fileID: 1043010079}
   sphere: {fileID: 1467407970}
+--- !u!114 &1782606649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1782606646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76cad0a3dd5157f498ffa9dc3d8594b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
