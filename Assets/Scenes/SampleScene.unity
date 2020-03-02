@@ -600,6 +600,7 @@ GameObject:
   - component: {fileID: 1043010083}
   - component: {fileID: 1043010082}
   - component: {fileID: 1043010081}
+  - component: {fileID: 1043010080}
   m_Layer: 0
   m_Name: Road
   m_TagString: Untagged
@@ -607,6 +608,20 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &1043010080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1043010079}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3731d146c9402e44c87060b790bebfb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  offset: {x: 0, y: -5, z: 0}
+  rotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!23 &1043010081
 MeshRenderer:
   m_ObjectHideFlags: 0

@@ -14,6 +14,8 @@ public class TrackDrawer : MonoBehaviour
     private readonly int numRoadBehind = 50;
     private readonly int numRoadAhead = 300;
     private readonly float frequency = 0.002f;
+    private readonly int flyInFreq = 20;
+    private int flyInCounter;
 
     private LinkedList<GameObject> roadObjects;
 
@@ -22,6 +24,7 @@ public class TrackDrawer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        flyInCounter = 0;
         spheres = new List<GameObject>();
         roadObjects = new LinkedList<GameObject>();
         last_t = 0;
@@ -45,7 +48,14 @@ public class TrackDrawer : MonoBehaviour
             Vector2 deriv = track.GetDeriv(0, f + numRoadAhead * frequency, frequency);
             float angle = (float)Mathf.Atan2(deriv.y, deriv.x);
 
+            flyInCounter++;
             roadObjects.AddLast(Instantiate(road, new Vector3(position.x, -0.122f, position.y), Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up)));
+            if (flyInCounter == flyInFreq)
+            {
+                flyInCounter = 0;
+                roadObjects.Last.Value.GetComponent<FlyIn>().offset = new Vector3(0, 10, 0);
+            }
+            roadObjects.Last.Value.GetComponent<FlyIn>().enabled = true;
             Destroy(roadObjects.First.Value);
             roadObjects.RemoveFirst();
         }
