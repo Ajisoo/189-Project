@@ -34,14 +34,16 @@ public class TrackInterface : MonoBehaviour
         }
         curve %= trackGenerator.num_of_curves;
         if (curve < 0) curve += trackGenerator.num_of_curves;
-        Vector2 r0 = (1 - offset) * trackGenerator.track[(3 * curve + 0) % trackGenerator.track.Length] + offset * trackGenerator.track[(3 * curve + 1) % trackGenerator.track.Length];
-        Vector2 r1 = (1 - offset) * trackGenerator.track[(3 * curve + 1) % trackGenerator.track.Length] + offset * trackGenerator.track[(3 * curve + 2) % trackGenerator.track.Length];
-        Vector2 r2 = (1 - offset) * trackGenerator.track[(3 * curve + 2) % trackGenerator.track.Length] + offset * trackGenerator.track[(3 * curve + 3) % trackGenerator.track.Length];
 
-        Vector2 q0 = (1 - offset) * r0 + offset * r1;
-        Vector2 q1 = (1 - offset) * r1 + offset * r2;
+        Vector4 coeff = new Vector4(offset * offset * offset, 3 * offset * offset * (1 - offset), 3 * offset * (1 - offset) * (1 - offset), (1 - offset) * (1 - offset) * (1 - offset));
 
-        return (1 - offset) * q0 + offset * q1;
+        Vector2 p0 = trackGenerator.track[(3 * curve + 0) % trackGenerator.track.Length];
+        Vector2 p1 = trackGenerator.track[(3 * curve + 1) % trackGenerator.track.Length];
+        Vector2 p2 = trackGenerator.track[(3 * curve + 2) % trackGenerator.track.Length];
+        Vector2 p3 = trackGenerator.track[(3 * curve + 3) % trackGenerator.track.Length];
+
+        return p3 * coeff.x + p2 * coeff.y + p1 * coeff.z + p0 * coeff.w;
+
     }
 
     public Vector2 GetDeriv(int curve, float offset, float precision = 0.01f)
@@ -61,27 +63,32 @@ public class TrackInterface : MonoBehaviour
         }
         curve %= trackGenerator.num_of_curves;
         if (curve < 0) curve += trackGenerator.num_of_curves;
-        Vector2 r0 = (1 - offset) * trackGenerator.track[(3 * curve + 0) % trackGenerator.track.Length] + offset * trackGenerator.track[(3 * curve + 1) % trackGenerator.track.Length];
-        Vector2 r1 = (1 - offset) * trackGenerator.track[(3 * curve + 1) % trackGenerator.track.Length] + offset * trackGenerator.track[(3 * curve + 2) % trackGenerator.track.Length];
-        Vector2 r2 = (1 - offset) * trackGenerator.track[(3 * curve + 2) % trackGenerator.track.Length] + offset * trackGenerator.track[(3 * curve + 3) % trackGenerator.track.Length];
+        Vector4 coeff = new Vector4(3*offset * offset, 3*(2-3*offset)*offset, 9 * offset * offset - 12 * offset + 3, -3*(1-offset)*(1-offset));
 
-        Vector2 q0 = (1 - offset) * r0 + offset * r1;
-        Vector2 q1 = (1 - offset) * r1 + offset * r2;
+        Vector2 p0 = trackGenerator.track[(3 * curve + 0) % trackGenerator.track.Length];
+        Vector2 p1 = trackGenerator.track[(3 * curve + 1) % trackGenerator.track.Length];
+        Vector2 p2 = trackGenerator.track[(3 * curve + 2) % trackGenerator.track.Length];
+        Vector2 p3 = trackGenerator.track[(3 * curve + 3) % trackGenerator.track.Length];
 
-        Vector2 start = (1 - offset) * q0 + offset * q1;
-
-        offset += precision;
-        curve += (int)offset;
-        offset %= 1;
-        curve %= trackGenerator.num_of_curves;
-        if (curve < 0) curve += trackGenerator.num_of_curves;
-        r0 = (1 - offset) * trackGenerator.track[(3 * curve + 0) % trackGenerator.track.Length] + offset * trackGenerator.track[(3 * curve + 1) % trackGenerator.track.Length];
-        r1 = (1 - offset) * trackGenerator.track[(3 * curve + 1) % trackGenerator.track.Length] + offset * trackGenerator.track[(3 * curve + 2) % trackGenerator.track.Length];
-        r2 = (1 - offset) * trackGenerator.track[(3 * curve + 2) % trackGenerator.track.Length] + offset * trackGenerator.track[(3 * curve + 3) % trackGenerator.track.Length];
-
-        q0 = (1 - offset) * r0 + offset * r1;
-        q1 = (1 - offset) * r1 + offset * r2;
-
-        return ((1 - offset) * q0 + offset * q1) - start;
+        return p3 * coeff.x + p2 * coeff.y + p1 * coeff.z + p0 * coeff.w;
     }
+
+    //public (Vector2[], float, float) samplePoints(float curve, float offset, float distance_between_samples, float distance)
+    //{
+    //    if (offset < 0)
+    //    {
+    //        while (offset < 0)
+    //        {
+    //            offset += 1;
+    //            curve -= 1;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        curve += (int)offset;
+    //        offset %= 1;
+    //    }
+    //    curve %= trackGenerator.num_of_curves;
+    //    if (curve < 0) curve += trackGenerator.num_of_curves;
+    //}
 }

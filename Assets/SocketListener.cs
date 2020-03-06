@@ -10,49 +10,39 @@ using UnityEngine;
 public class SocketListener : MonoBehaviour
 {
     public int port;
-    private string data = "";
+    public static ManualResetEvent allDone = new ManualResetEvent(false);
+    public class StringHolder
+    {
+        public string data;
+    }
+    public static StringHolder str = new StringHolder();
     byte[] bytes = new byte[1024];
     Socket handler = null;
     // Start is called before the first frame update
     void Start()
     {
-        data = "";
-        new Thread(new ThreadStart(doThing)).Start();
+        str.data = "";
+        //new Thread(new ThreadStart(doThing)).Start();
+        //doThing();
     }
 
     void doThing()
     {
-        IPAddress address = IPAddress.Parse("127.0.0.1");
-        IPEndPoint localEndPoint = new IPEndPoint(address, 11001);
+        Debug.Log("Starting thread");
+        IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, 27016);
 
-        Socket listener = new Socket(address.AddressFamily,
+        Socket listener = new Socket(AddressFamily.InterNetwork,
            SocketType.Stream, ProtocolType.Tcp);
         try
         {
             listener.Bind(localEndPoint);
             listener.Listen(10);
-            handler = listener.Accept();
-            Debug.Log("Accepted input");
             // An incoming connection needs to be processed.  
-            while (true)
-            {
-                int bytesRec = handler.Receive(bytes);
-                StringBuilder hex = new StringBuilder(bytesRec * 2);
-                foreach (byte b in bytes)
-                {
-                    hex.AppendFormat("{0:x2}", b);
-                }
-                Debug.Log(hex.ToString());
-                lock (data)
-                {
-                    data = Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                    Debug.Log(bytes.ToString());
-                    if (data.IndexOf("<EOF>") > -1)
-                    {
-                        break;
-                    }
-                }
-            }
+            Debug.Log("Waiting for a connection...");
+            listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
+
+            allDone.WaitOne();
+            listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
         }
         catch (Exception e)
         {
@@ -67,10 +57,81 @@ public class SocketListener : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        lock (data)
+        lock (str)
         {
-            //if (data != null) Debug.Log("Text received : " + data);
+            //if (str.data != null) Debug.Log("Text received : " + str.data);
 
+        }
+    }
+
+    public class StateObject
+    {
+        // Client  socket.  
+        public Socket workSocket = null;
+        // Size of receive buffer.  
+        public const int BufferSize = 1024;
+        // Receive buffer.  
+        public byte[] buffer = new byte[BufferSize];
+        // Received data string.  
+        public StringBuilder sb = new StringBuilder();
+    }
+
+    public static void AcceptCallback(IAsyncResult ar)
+    {
+        // Signal the main thread to continue.  
+        allDone.Set();
+
+        // Get the socket that handles the client request.  
+        Socket listener = (Socket)ar.AsyncState;
+        Socket handler = listener.EndAccept(ar);
+
+        // Create the state object.  
+        StateObject state = new StateObject();
+        state.workSocket = handler;
+        Debug.Log("Accepted");
+        handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+            new AsyncCallback(ReadCallback), state);
+    }
+
+    public static void ReadCallback(IAsyncResult ar)
+    {
+        String content = String.Empty;
+
+        // Retrieve the state object and the handler socket  
+        // from the asynchronous state object.  
+        StateObject state = (StateObject)ar.AsyncState;
+        Socket handler = state.workSocket;
+
+        // Read data from the client socket.   
+        int bytesRead = handler.EndReceive(ar);
+
+        if (bytesRead > 0)
+        {
+            // There  might be more data, so store the data received so far.  
+            state.sb.Append(Encoding.ASCII.GetString(
+                state.buffer, 0, bytesRead));
+
+            Debug.Log(state.sb.ToString());
+            // Check for end-of-file tag. If it is not there, read   
+            // more data.  
+            content = state.sb.ToString();
+            if (content.IndexOf("<EOF>") > -1)
+            {
+                // All the data has been read from the   
+                // client. Display it on the console.  
+                lock (str)
+                {
+                    str.data = content;
+                }
+                handler.Shutdown(SocketShutdown.Both);
+                handler.Close();
+            }
+            else
+            {
+                // Not all data received. Get more.  
+                handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+                new AsyncCallback(ReadCallback), state);
+            }
         }
     }
 }
