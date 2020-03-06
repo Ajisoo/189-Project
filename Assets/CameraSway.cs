@@ -7,38 +7,45 @@ public class CameraSway : MonoBehaviour
     private Vector3 speed;
     private Vector3 local_local_pos;
     private LinkedList<Vector3> old_pos;
-    private int size = 5;
+    public CarMovement car;
+    private int size = 50;
+    private float weight = 0.01f;
+    private Quaternion originalRot;
     // Start is called before the first frame update
     void Start()
     {
-        old_pos = new LinkedList<Vector3>();
+        originalRot = transform.rotation;
+        //old_pos = new LinkedList<Vector3>();
         speed = new Vector3(0, 0, 0);
         local_local_pos = new Vector3(0, 0, 0);
     }
 
     // Update is called once per frame
-    void Update()
+    public void UpdateSelf()
     {
+        if (old_pos == null)
+        {
+            old_pos = new LinkedList<Vector3>();
+            return;
+        }
         if (old_pos.Count < size)
         {
+            transform.position = (car.transform.position + car.transform.rotation * new Vector3(0, 1.8f, -4f));
+            transform.rotation = car.transform.rotation * originalRot;
             if (old_pos.Count > 0)
             {
-                speed += (transform.position - old_pos.Last.Value) / (size - 1);
+                speed += (transform.position - old_pos.Last.Value);
             }
             old_pos.AddLast(transform.position);
             return;
         }
+        transform.position = (old_pos.Last.Value + speed) * weight + (car.transform.position + car.transform.rotation * new Vector3(0, 1.8f, -4f)) * (1 - weight);
+        transform.rotation = car.transform.rotation * originalRot;
+
         Vector3 pos = transform.position;
-
-
-        local_local_pos += Quaternion.Inverse(transform.parent.transform.rotation) * (speed - (pos - old_pos.Last.Value)) * 0.01f;
-        local_local_pos *= 0.95f;
-
-        speed += (pos - old_pos.Last.Value) / (size - 1);
-        speed -= (old_pos.First.Next.Value - old_pos.First.Value) / 5;
+        speed += (pos - old_pos.Last.Value);
+        speed *= 0.999f;
         old_pos.AddLast(pos);
         old_pos.RemoveFirst();
-
-        transform.localPosition = local_local_pos + new Vector3(0, 1.8f, -4f);
     }
 }

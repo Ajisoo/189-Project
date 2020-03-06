@@ -7,6 +7,7 @@ public class TrackDrawer : MonoBehaviour
     public TrackInterface track;
     public CarMovement car;
     public GameObject road;
+    public GameObject tree;
     public GameObject sphere;
 
     private List<GameObject> spheres;
@@ -16,8 +17,13 @@ public class TrackDrawer : MonoBehaviour
     public readonly float frequency = 0.002f;
     public readonly int flyInFreq = 5;
     private float flyInCounter;
+    public readonly int treePeriod = 100;
+    private float treeCounter;
+    private float treeRemoveCounter;
+    private bool left;
 
     private LinkedList<GameObject> roadObjects;
+    private LinkedList<GameObject> trees;
     private LinkedList<float> distances;
 
     private float last_t;
@@ -28,11 +34,14 @@ public class TrackDrawer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        treeCounter = 0;
+        treeRemoveCounter = 0;
         curve = 0;
         distance_ahead = 0;
         distance_behind = 0;
         flyInCounter = 0;
         spheres = new List<GameObject>();
+        trees = new LinkedList<GameObject>();
         roadObjects = new LinkedList<GameObject>();
         distances = new LinkedList<float>();
         float t = 0;
@@ -56,7 +65,14 @@ public class TrackDrawer : MonoBehaviour
             Vector2 neW = track.GetPos(curve, t);
             deriv = track.GetDeriv(curve, t);
             angle = (float)Mathf.Atan2(deriv.y, deriv.x);
+            if (treeCounter >= treePeriod)
+            {
+                left = !left;
+                treeCounter = 0;
+                trees.AddLast(Instantiate(tree, new Vector3(neW.x, 0.2f, neW.y) + Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up) * new Vector3((left ? -1 : 1) * Random.Range(5, 20), 0, 0), Quaternion.AngleAxis(Random.Range(0, 360), Vector3.up)));
+            }
             roadObjects.AddLast(Instantiate(road, new Vector3(neW.x, -0.122f, neW.y), Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up)));
+            treeCounter++;
             distance -= Vector2.Distance(old, neW);
             distances.AddLast(Vector2.Distance(old, neW));
             old = neW;
@@ -77,8 +93,15 @@ public class TrackDrawer : MonoBehaviour
             if (distance_behind - distance < 0) break;
             distance_behind -= distance;
             distances.RemoveFirst();
+            if (treeRemoveCounter >= treePeriod)
+            {
+                treeRemoveCounter = 0;
+                Destroy(trees.First.Value);
+                trees.RemoveFirst();
+            }
             Destroy(roadObjects.First.Value);
             roadObjects.RemoveFirst();
+            treeRemoveCounter++;
         }
         Vector2 old_pos = new Vector2(roadObjects.Last.Value.transform.position.x, roadObjects.Last.Value.transform.position.z);
         float t = last_t;
@@ -89,7 +112,14 @@ public class TrackDrawer : MonoBehaviour
             Vector2 neW = track.GetPos(curve, t);
             Vector2 deriv = track.GetDeriv(curve, t);
             float angle = (float)Mathf.Atan2(deriv.y, deriv.x);
+            if (treeCounter >= treePeriod)
+            {
+                left = !left;
+                treeCounter = 0;
+                trees.AddLast(Instantiate(tree, new Vector3(neW.x, 0.2f, neW.y) + Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up) * new Vector3((left ? -1 : 1) * Random.Range(5, 20), 0, 0), Quaternion.AngleAxis(Random.Range(0, 360), Vector3.up)));
+            }
             roadObjects.AddLast(Instantiate(road, new Vector3(neW.x, -0.122f, neW.y), Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up)));
+            treeCounter++;
             if (flyInCounter >= 1.0f/flyInFreq)
             {
                 roadObjects.Last.Value.GetComponent<FlyIn>().offset = new Vector3(0, 10, 0);
