@@ -70,8 +70,12 @@ public class TrackDrawer : MonoBehaviour
                 left = !left;
                 treeCounter = 0;
                 trees.AddLast(Instantiate(tree, new Vector3(neW.x, 0.2f, neW.y) + Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up) * new Vector3((left ? -1 : 1) * Random.Range(5, 20), 0, 0), Quaternion.AngleAxis(Random.Range(0, 360), Vector3.up)));
+                MeshRenderer[] renderers = trees.Last.Value.GetComponentsInChildren<MeshRenderer>();
+                renderers[0].enabled = true;
+                renderers[1].enabled = true;
             }
             roadObjects.AddLast(Instantiate(road, new Vector3(neW.x, -0.122f, neW.y), Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up)));
+            roadObjects.Last.Value.GetComponent<MeshRenderer>().enabled = true;
             treeCounter++;
             distance -= Vector2.Distance(old, neW);
             distances.AddLast(Vector2.Distance(old, neW));
@@ -83,6 +87,7 @@ public class TrackDrawer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (car.spinOut) return;
         flyInCounter += Time.deltaTime;
         distance_behind += car.speed * Time.deltaTime;
         distance_ahead += car.speed * Time.deltaTime;
@@ -117,8 +122,12 @@ public class TrackDrawer : MonoBehaviour
                 left = !left;
                 treeCounter = 0;
                 trees.AddLast(Instantiate(tree, new Vector3(neW.x, 0.2f, neW.y) + Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up) * new Vector3((left ? -1 : 1) * Random.Range(5, 20), 0, 0), Quaternion.AngleAxis(Random.Range(0, 360), Vector3.up)));
+                MeshRenderer[] renderers = trees.Last.Value.GetComponentsInChildren<MeshRenderer>();
+                renderers[0].enabled = true;
+                renderers[1].enabled = true;
             }
             roadObjects.AddLast(Instantiate(road, new Vector3(neW.x, -0.122f, neW.y), Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up)));
+            roadObjects.Last.Value.GetComponent<MeshRenderer>().enabled = true;
             treeCounter++;
             if (flyInCounter >= 1.0f/flyInFreq)
             {

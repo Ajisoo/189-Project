@@ -7,27 +7,65 @@ public class CarMovement : MonoBehaviour
 
     public TrackInterface track;
     public float speed = 40.0f;
-    private float distanceRemainingToTravel;
+    public float distanceRemainingToTravel;
     public CameraSway cameraSway;
+    public FadeBlack black;
 
-
+    public float spinOutRatio;
+    public bool spinOut;
+    bool spinLeft;
+    public Vector3 spinOutDeriv;
+    public float spinOutDistanceRatio;
     public float t;
+
+    public int startFrames;
+    public readonly float timeUntilReset = 2f;
+    public float timeRemaining;
+
+    public readonly float maxSpeed = 60;
 
     // Start is called before the first frame update
     void Start()
     {
-        autoDriving = false;
+        startFrames = 5;
+        spinOutRatio = 3.0f;
+        spinOut = false;
+        spinOutDistanceRatio = 1.0f;
         t = 0;
         distanceRemainingToTravel = 0;
-        aimT = lookAheadT;
         Vector2 position = track.GetPos(0, t);
         transform.position = new Vector3(position.x, 0.291f, position.y);
     }
 
     // Update is called once per frame
-    void AUpdate()
+    void Update()
     {
+        startFrames--;
         distanceRemainingToTravel += Time.deltaTime * speed;
+        if (spinOut)
+        {
+            timeRemaining -= Time.deltaTime;
+            if (timeRemaining < 0)
+            {
+                startFrames = 5;
+                spinOut = false;
+                distanceRemainingToTravel = 0;
+                Vector2 position1 = track.GetPos(0, t);
+                transform.position = new Vector3(position1.x, 0.291f, position1.y); 
+                Vector2 deriv1 = track.GetDeriv(0, t);
+                float angle1 = (float)Mathf.Atan2(deriv1.y, deriv1.x);
+                transform.rotation = Quaternion.AngleAxis(-angle1 * Mathf.Rad2Deg + 90, Vector3.up);
+                cameraSway.ResetCamera();
+                black.Undo();
+                speed = 10.0f;
+            }
+            transform.position += spinOutDistanceRatio * distanceRemainingToTravel * Vector3.Normalize(new Vector3(spinOutDeriv.x, 0, spinOutDeriv.y));
+            transform.rotation = transform.rotation *= Quaternion.AngleAxis( (spinLeft ? -1 : 1) * 20f * spinOutDistanceRatio, Vector3.up);
+            cameraSway.UpdateSelf();
+            spinOutDistanceRatio *= 0.99f - 0.04f * speed / maxSpeed;
+            distanceRemainingToTravel = 0;
+            return;
+        }
         Vector2 old = track.GetPos(0, t);
         while (true)
         {
@@ -39,49 +77,25 @@ public class CarMovement : MonoBehaviour
         }
         Vector2 position = track.GetPos(0, t);
         Vector2 deriv = track.GetDeriv(0, t);
+        float angle = (float)Mathf.Atan2(deriv.y, deriv.x);
+
+        if (startFrames < 0 && Quaternion.Angle(transform.rotation, Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up)) > spinOutRatio)
+        {
+            black.start();
+            timeRemaining = timeUntilReset;
+            spinLeft = Quaternion.Angle(transform.rotation, Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90 + 1f, Vector3.up)) < Quaternion.Angle(transform.rotation, Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up));
+            spinOut = true;
+            Debug.Log(spinLeft);
+            spinOutDeriv = track.GetDeriv(0, t);
+            distanceRemainingToTravel -= Time.deltaTime * speed;
+            Update();
+            return;
+        }
 
         transform.position = new Vector3(position.x, 0.291f, position.y);
-
-        float angle = (float)Mathf.Atan2(deriv.y, deriv.x);
+        //if (Quaternion.Angle(transform.rotation, Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up)) > speed * ) ;
+        //Debug.Log(Quaternion.Angle(transform.rotation, Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up)));
         transform.rotation = Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up);
         cameraSway.UpdateSelf();
-    }
-
-    public float aimT;
-
-    bool autoDriving;
-    float angleCoeff = 0.000005f;
-    float angleBase = 0.9999f;
-    public readonly float lookAheadT = 0.01f;
-
-    void Update()
-    {
-        distanceRemainingToTravel += Time.deltaTime * speed;
-        float distanceToMove = distanceRemainingToTravel;
-        Vector2 old = track.GetPos(0, aimT);
-        while (true)
-        {
-            Vector2 next = track.GetPos(0, aimT + 0.002f);
-            if (distanceRemainingToTravel - Vector2.Distance(old, next) <= 0) break;
-            distanceRemainingToTravel -= Vector3.Distance(old, next);
-            old = next;
-            aimT += 0.002f;
-        }
-        Vector2 position = track.GetPos(0, aimT);
-        Debug.Log(position + " " + transform.position);
-
-        Vector3 deriv = new Vector3(position.x - transform.position.x, 0, position.y - transform.position.z);
-        Vector3 normalized = Vector3.Normalize(deriv);
-        Debug.Log(deriv);
-
-        transform.position += new Vector3(deriv.x < 0 ? Mathf.Max(deriv.x, normalized.x * distanceToMove) : Mathf.Min(deriv.x, normalized.x * distanceToMove), 0, 
-            deriv.z < 0 ? Mathf.Max(deriv.z, normalized.z * distanceToMove) : Mathf.Min(deriv.z, normalized.z * distanceToMove));
-        //transform.position += new Vector3(normalized.x * distanceToMove, 0, normalized.z * distanceToMove);
-
-        float angle = (float)Mathf.Atan2(deriv.z, deriv.x);
-        Debug.Log(angle);
-        if (deriv != Vector3.zero) transform.rotation = Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up);
-        cameraSway.UpdateSelf();
-
     }
 }

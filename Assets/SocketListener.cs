@@ -11,6 +11,9 @@ public class SocketListener : MonoBehaviour
 {
     public int port;
     public static ManualResetEvent allDone = new ManualResetEvent(false);
+
+    public float readValue1;
+    public float readValue2;
     public class StringHolder
     {
         public string data;

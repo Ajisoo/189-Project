@@ -23,6 +23,11 @@ public class CameraSway : MonoBehaviour
     // Update is called once per frame
     public void UpdateSelf()
     {
+        if (car.spinOut)
+        {
+            transform.position += car.spinOutDistanceRatio * car.distanceRemainingToTravel * Vector3.Normalize(new Vector3(car.spinOutDeriv.x, 0, car.spinOutDeriv.y)) * 0.9f;
+            return;
+        }
         if (old_pos == null)
         {
             old_pos = new LinkedList<Vector3>();
@@ -47,5 +52,11 @@ public class CameraSway : MonoBehaviour
         speed *= 0.999f;
         old_pos.AddLast(pos);
         old_pos.RemoveFirst();
+    }
+
+    public void ResetCamera()
+    {
+        transform.position = car.transform.position + car.transform.rotation * new Vector3(0, 1.8f, -4f);
+        transform.rotation = car.transform.rotation * originalRot;
     }
 }
