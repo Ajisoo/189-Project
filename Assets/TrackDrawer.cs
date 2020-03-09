@@ -9,6 +9,7 @@ public class TrackDrawer : MonoBehaviour
     public GameObject road;
     public GameObject tree;
     public GameObject sphere;
+    public Material endTrack;
 
     private List<GameObject> spheres;
 
@@ -34,7 +35,24 @@ public class TrackDrawer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //roadObjects = new LinkedList<GameObject>();
+        //for (float test = 0; test < TrackGenerator.num_of_curves; test += 0.002f)
+        //{
+        //    Vector2 posTest = track.GetPos(0, test);
+        //    Vector2 derivTest = track.GetDeriv(0, test);
+        //    float angleTest = (float)Mathf.Atan2(derivTest.y, derivTest.x);
+        //    roadObjects.AddLast(Instantiate(road, new Vector3(posTest.x, -0.122f, posTest.y), Quaternion.AngleAxis(-angleTest * Mathf.Rad2Deg + 90, Vector3.up)));
+        //    roadObjects.Last.Value.GetComponent<MeshRenderer>().enabled = true;
+        //}
+        //return;
         treeCounter = 0;
+        //spheres = new List<GameObject>();
+        //for (int i = 0; i < track.trackGenerator.track.Length; i++)
+        //{
+        //    Vector3 pos = new Vector3(track.trackGenerator.track[i].x, 1, track.trackGenerator.track[i].y);
+        //    spheres.Add(Instantiate(sphere, pos, Quaternion.identity));
+        //    spheres[spheres.Count - 1].GetComponent<MeshRenderer>().enabled = true;
+        //}
         treeRemoveCounter = 0;
         curve = 0;
         distance_ahead = 0;
@@ -87,6 +105,7 @@ public class TrackDrawer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (car.t >= TrackGenerator.num_of_curves) return;
         if (car.spinOut) return;
         flyInCounter += Time.deltaTime;
         distance_behind += car.speed * Time.deltaTime;
@@ -128,6 +147,11 @@ public class TrackDrawer : MonoBehaviour
             }
             roadObjects.AddLast(Instantiate(road, new Vector3(neW.x, -0.122f, neW.y), Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up)));
             roadObjects.Last.Value.GetComponent<MeshRenderer>().enabled = true;
+            if (t >= TrackGenerator.num_of_curves)
+            {
+                roadObjects.Last.Value.transform.position += new Vector3(0, 0.001f, 0);
+                roadObjects.Last.Value.GetComponent<MeshRenderer>().material = endTrack;
+            }
             treeCounter++;
             if (flyInCounter >= 1.0f/flyInFreq)
             {
@@ -144,12 +168,6 @@ public class TrackDrawer : MonoBehaviour
         //foreach (GameObject my_sphere in spheres)
         //{
         //    Destroy(my_sphere, 0);
-        //}
-        //spheres = new List<GameObject>();
-        //for (int i = 0; i < track.trackGenerator.track.Length; i++)
-        //{
-        //    Vector3 pos = new Vector3(track.trackGenerator.track[i].x, 1, track.trackGenerator.track[i].y);
-        //    spheres.Add(Instantiate(sphere, pos, Quaternion.identity));
         //}
     }
 }

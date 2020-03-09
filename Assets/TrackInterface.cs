@@ -32,8 +32,8 @@ public class TrackInterface : MonoBehaviour
             curve += (int)offset;
             offset %= 1;
         }
-        curve %= trackGenerator.num_of_curves;
-        if (curve < 0) curve += trackGenerator.num_of_curves;
+        curve %= TrackGenerator.num_of_curves;
+        if (curve < 0) curve += TrackGenerator.num_of_curves;
 
         Vector4 coeff = new Vector4(offset * offset * offset, 3 * offset * offset * (1 - offset), 3 * offset * (1 - offset) * (1 - offset), (1 - offset) * (1 - offset) * (1 - offset));
 
@@ -61,8 +61,8 @@ public class TrackInterface : MonoBehaviour
             curve += (int)offset;
             offset %= 1;
         }
-        curve %= trackGenerator.num_of_curves;
-        if (curve < 0) curve += trackGenerator.num_of_curves;
+        curve %= TrackGenerator.num_of_curves;
+        if (curve < 0) curve += TrackGenerator.num_of_curves;
         Vector4 coeff = new Vector4(3*offset * offset, 3*(2-3*offset)*offset, 9 * offset * offset - 12 * offset + 3, -3*(1-offset)*(1-offset));
 
         Vector2 p0 = trackGenerator.track[(3 * curve + 0) % trackGenerator.track.Length];

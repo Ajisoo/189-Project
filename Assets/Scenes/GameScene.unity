@@ -331,6 +331,7 @@ MonoBehaviour:
   road: {fileID: 1043010079}
   tree: {fileID: 1709611152}
   sphere: {fileID: 1467407970}
+  endTrack: {fileID: 2100000, guid: d0bf6fa12b1b6d04288aec6095faa63b, type: 2}
 --- !u!4 &496458725
 Transform:
   m_ObjectHideFlags: 0
@@ -527,6 +528,7 @@ GameObject:
   - component: {fileID: 963194228}
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
+  - component: {fileID: 963194229}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -604,6 +606,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 15, y: 0, z: 0}
+--- !u!114 &963194229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963194225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1bad41d8723fb0840b5ef676c3b9c7fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  time: 0
 --- !u!1 &1025472517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1303,6 +1318,7 @@ MonoBehaviour:
   distanceRemainingToTravel: 0
   cameraSway: {fileID: 963194226}
   black: {fileID: 2035963268}
+  stopwatch: {fileID: 963194229}
   spinOutRatio: 0
   spinOut: 0
   spinOutDeriv: {x: 0, y: 0, z: 0}

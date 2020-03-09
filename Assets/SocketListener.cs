@@ -25,7 +25,7 @@ public class SocketListener : MonoBehaviour
     void Start()
     {
         str.data = "";
-        //new Thread(new ThreadStart(doThing)).Start();
+        new Thread(new ThreadStart(doThing)).Start();
         //doThing();
     }
 
@@ -62,6 +62,7 @@ public class SocketListener : MonoBehaviour
     {
         lock (str)
         {
+            //readValue1 = float.Parse(str.data);
             //if (str.data != null) Debug.Log("Text received : " + str.data);
 
         }
@@ -114,7 +115,7 @@ public class SocketListener : MonoBehaviour
             state.sb.Append(Encoding.ASCII.GetString(
                 state.buffer, 0, bytesRead));
 
-            Debug.Log(state.sb.ToString());
+            //Debug.Log(state.sb.ToString());
             // Check for end-of-file tag. If it is not there, read   
             // more data.  
             content = state.sb.ToString();
@@ -125,6 +126,7 @@ public class SocketListener : MonoBehaviour
                 lock (str)
                 {
                     str.data = content;
+                    Debug.Log(str.data);
                 }
                 handler.Shutdown(SocketShutdown.Both);
                 handler.Close();

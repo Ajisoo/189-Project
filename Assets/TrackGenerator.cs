@@ -4,13 +4,16 @@ using UnityEngine;
 
 public class TrackGenerator : MonoBehaviour
 {
-    public readonly int num_of_curves = 10;
+    public static readonly int num_of_curves = 10;
     private readonly int push_iterations = 3;
     public Vector2[] track;
+
+    public int seed;
 
     void Awake()
     {
         track = new Vector2[num_of_curves * 3];
+        seed = (int)(Random.value * int.MaxValue);
         generateNewTrack((int)(Random.value * int.MaxValue));
     }
 
@@ -30,10 +33,10 @@ public class TrackGenerator : MonoBehaviour
             cp1[i] = new Vector2(Random.Range(-125, 125), Random.Range(-125, 125));
         }
 
-        for (int i = 0; i < push_iterations; i++)
-        {
-            pushApart(cp1);
-        }
+        //for (int i = 0; i < push_iterations; i++)
+        //{
+        //    pushApart(cp1);
+        //}
 
         Vector2[] rSet = new Vector2[cp1.Length * 2];
         Vector2 disp = new Vector2();
@@ -104,6 +107,7 @@ public class TrackGenerator : MonoBehaviour
             //I got a vector going to the next and to the previous points, normalised.  
 
             float a = (float)System.Math.Atan2(px * ny - py * nx, px * nx + py * ny); // perp dot product between the previous and next point. Google it you should learn about it!  
+            Debug.Log(System.Math.Abs(a * 180 / System.Math.PI));
 
             if (System.Math.Abs(a * 180 / System.Math.PI) <= 100) continue;
 
@@ -123,20 +127,21 @@ public class TrackGenerator : MonoBehaviour
 
     private void pushApart(Vector2[] dataSet)
     {
-        float dst = 15; //I found that 15 is a good value, though maybe, depending on your scale you'll need other value.  
+        float dst = 30; //I found that 15 is a good value, though maybe, depending on your scale you'll need other value.  
         float dst2 = dst * dst;
         for (int i = 0; i < dataSet.Length; ++i)
         {
             for (int j = i + 1; j < dataSet.Length; ++j)
             {
-                if ((dataSet[i].x - dataSet[j].x) * (dataSet[i].x - dataSet[j].x) + (dataSet[i].y - dataSet[j].y) * (dataSet[i].y - dataSet[j].y) < dst2)
+                bool doub = j % 2 == 0;
+                if ((dataSet[i].x - dataSet[j].x) * (dataSet[i].x - dataSet[j].x) + (dataSet[i].y - dataSet[j].y) * (dataSet[i].y - dataSet[j].y) < (doub ? 4 : 1) * dst2)
                 {
                     float hx = dataSet[j].x - dataSet[i].x;
                     float hy = dataSet[j].y - dataSet[i].y;
                     float hl = (float)System.Math.Sqrt(hx * hx + hy * hy);
                     hx /= hl;
                     hy /= hl;
-                    float dif = dst - hl;
+                    float dif = (doub ? 2 : 1) * dst - hl;
                     hx *= dif;
                     hy *= dif;
                     dataSet[j].x += hx;

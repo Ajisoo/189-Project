@@ -10,6 +10,7 @@ public class CarMovement : MonoBehaviour
     public float distanceRemainingToTravel;
     public CameraSway cameraSway;
     public FadeBlack black;
+    public Stopwatch stopwatch;
 
     public float spinOutRatio;
     public bool spinOut;
@@ -27,8 +28,9 @@ public class CarMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        startFrames = 5;
-        spinOutRatio = 3.0f;
+        stopwatch.StartStopwatch();
+        startFrames = 50;
+        spinOutRatio = 2.0f;
         spinOut = false;
         spinOutDistanceRatio = 1.0f;
         t = 0;
@@ -42,12 +44,20 @@ public class CarMovement : MonoBehaviour
     {
         startFrames--;
         distanceRemainingToTravel += Time.deltaTime * speed;
+        if (t >= TrackGenerator.num_of_curves)
+        {
+            transform.position += spinOutDistanceRatio * distanceRemainingToTravel * Vector3.Normalize(new Vector3(spinOutDeriv.x, 0, spinOutDeriv.y));
+            cameraSway.UpdateSelf();
+            spinOutDistanceRatio *= 0.99f - 0.04f * speed / maxSpeed;
+            distanceRemainingToTravel = 0;
+            return;
+        }
         if (spinOut)
         {
             timeRemaining -= Time.deltaTime;
             if (timeRemaining < 0)
             {
-                startFrames = 5;
+                startFrames = 50;
                 spinOut = false;
                 distanceRemainingToTravel = 0;
                 Vector2 position1 = track.GetPos(0, t);
@@ -66,6 +76,7 @@ public class CarMovement : MonoBehaviour
             distanceRemainingToTravel = 0;
             return;
         }
+        speed += Time.deltaTime * 3;
         Vector2 old = track.GetPos(0, t);
         while (true)
         {
@@ -75,17 +86,23 @@ public class CarMovement : MonoBehaviour
             old = next;
             t += 0.002f;
         }
+        if (t >= TrackGenerator.num_of_curves)
+        {
+            stopwatch.StopStopwatch();
+            spinOutDeriv = track.GetDeriv(0, t);
+        }
         Vector2 position = track.GetPos(0, t);
         Vector2 deriv = track.GetDeriv(0, t);
         float angle = (float)Mathf.Atan2(deriv.y, deriv.x);
 
-        if (startFrames < 0 && Quaternion.Angle(transform.rotation, Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up)) > spinOutRatio)
+        if (startFrames < 0 && Quaternion.Angle(transform.rotation, Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up)) > spinOutRatio * (100 - speed) / 20)
         {
             black.start();
+            spinOutDistanceRatio = 1.0f;
             timeRemaining = timeUntilReset;
             spinLeft = Quaternion.Angle(transform.rotation, Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90 + 1f, Vector3.up)) < Quaternion.Angle(transform.rotation, Quaternion.AngleAxis(-angle * Mathf.Rad2Deg + 90, Vector3.up));
             spinOut = true;
-            Debug.Log(spinLeft);
+            //Debug.Log(spinLeft);
             spinOutDeriv = track.GetDeriv(0, t);
             distanceRemainingToTravel -= Time.deltaTime * speed;
             Update();
