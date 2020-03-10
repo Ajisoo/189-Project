@@ -105,7 +105,7 @@ public class TrackDrawer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (car.t >= TrackGenerator.num_of_curves) return;
+        //if (car.t >= TrackGenerator.num_of_curves) return;
         if (car.spinOut) return;
         flyInCounter += Time.deltaTime;
         distance_behind += car.speed * Time.deltaTime;

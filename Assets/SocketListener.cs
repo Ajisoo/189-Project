@@ -11,20 +11,21 @@ public class SocketListener : MonoBehaviour
 {
     public int port;
     public static ManualResetEvent allDone = new ManualResetEvent(false);
-
-    public float readValue1;
-    public float readValue2;
-    public class StringHolder
+    public static bool one_used;
+    public class IntHolder
     {
-        public string data;
+        public int data;
     }
-    public static StringHolder str = new StringHolder();
+    public static IntHolder val1 = new IntHolder();
+    public static IntHolder val2 = new IntHolder();
     byte[] bytes = new byte[1024];
     Socket handler = null;
     // Start is called before the first frame update
     void Start()
     {
-        str.data = "";
+        one_used = false;
+        val1.data = 0;
+        val2.data = 0;
         new Thread(new ThreadStart(doThing)).Start();
         //doThing();
     }
@@ -45,6 +46,7 @@ public class SocketListener : MonoBehaviour
             listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
 
             allDone.WaitOne();
+            one_used = true;
             listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
         }
         catch (Exception e)
@@ -60,12 +62,7 @@ public class SocketListener : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        lock (str)
-        {
-            //readValue1 = float.Parse(str.data);
-            //if (str.data != null) Debug.Log("Text received : " + str.data);
-
-        }
+        
     }
 
     public class StateObject
@@ -115,27 +112,30 @@ public class SocketListener : MonoBehaviour
             state.sb.Append(Encoding.ASCII.GetString(
                 state.buffer, 0, bytesRead));
 
-            //Debug.Log(state.sb.ToString());
+
+            Debug.Log(state.sb.ToString());
             // Check for end-of-file tag. If it is not there, read   
             // more data.  
-            content = state.sb.ToString();
             if (content.IndexOf("<EOF>") > -1)
             {
                 // All the data has been read from the   
                 // client. Display it on the console.  
-                lock (str)
-                {
-                    str.data = content;
-                    Debug.Log(str.data);
-                }
+                Debug.Log("ending");
                 handler.Shutdown(SocketShutdown.Both);
                 handler.Close();
             }
             else
             {
+                lock (val1)
+                {
+                    Debug.Log("Received " + state.sb.ToString());
+                    val1.data = int.Parse(state.sb.ToString());
+                    state.sb.Clear();
+                }
                 // Not all data received. Get more.  
                 handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
                 new AsyncCallback(ReadCallback), state);
+
             }
         }
     }

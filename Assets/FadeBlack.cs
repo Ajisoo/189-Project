@@ -5,7 +5,7 @@ using UnityEngine;
 public class FadeBlack : MonoBehaviour
 {
     public CarMovement car;
-    public readonly float timeDelay = 0.5f;
+    public readonly float timeDelay = 2.0f;
     public float remainingDelay;
     bool fade;
     // Start is called before the first frame update
@@ -34,12 +34,12 @@ public class FadeBlack : MonoBehaviour
                     remainingDelay -= Time.deltaTime;
                     return;
                 }
-                GetComponent<CanvasGroup>().alpha = Mathf.Min(1f, GetComponent<CanvasGroup>().alpha + Time.deltaTime);
+                GetComponent<CanvasGroup>().alpha = Mathf.Min(1f, GetComponent<CanvasGroup>().alpha + Time.deltaTime / 2);
             }
         }
         else
         {
-            GetComponent<CanvasGroup>().alpha = Mathf.Max(0f, GetComponent<CanvasGroup>().alpha - Time.deltaTime);
+            GetComponent<CanvasGroup>().alpha = Mathf.Max(0f, GetComponent<CanvasGroup>().alpha - Time.deltaTime / 2);
 
         }
     }

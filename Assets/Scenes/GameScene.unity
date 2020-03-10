@@ -314,6 +314,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   track: []
+  seed: 0
 --- !u!114 &496458724
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1299,8 +1300,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   port: 0
-  readValue1: 0
-  readValue2: 0
 --- !u!114 &1782606650
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1314,7 +1313,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   track: {fileID: 496458722}
-  speed: 60
+  speed: 10
   distanceRemainingToTravel: 0
   cameraSway: {fileID: 963194226}
   black: {fileID: 2035963268}

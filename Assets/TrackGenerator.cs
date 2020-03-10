@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TrackGenerator : MonoBehaviour
 {
-    public static readonly int num_of_curves = 10;
+    public static readonly int num_of_curves = 15;
     private readonly int push_iterations = 3;
     public Vector2[] track;
 
@@ -14,7 +14,8 @@ public class TrackGenerator : MonoBehaviour
     {
         track = new Vector2[num_of_curves * 3];
         seed = (int)(Random.value * int.MaxValue);
-        generateNewTrack((int)(Random.value * int.MaxValue));
+        seed = 3;
+        generateNewTrack(seed);
     }
 
     // Start is called before the first frame update
@@ -107,7 +108,7 @@ public class TrackGenerator : MonoBehaviour
             //I got a vector going to the next and to the previous points, normalised.  
 
             float a = (float)System.Math.Atan2(px * ny - py * nx, px * nx + py * ny); // perp dot product between the previous and next point. Google it you should learn about it!  
-            Debug.Log(System.Math.Abs(a * 180 / System.Math.PI));
+            //Debug.Log(System.Math.Abs(a * 180 / System.Math.PI));
 
             if (System.Math.Abs(a * 180 / System.Math.PI) <= 100) continue;
 
@@ -127,7 +128,7 @@ public class TrackGenerator : MonoBehaviour
 
     private void pushApart(Vector2[] dataSet)
     {
-        float dst = 30; //I found that 15 is a good value, though maybe, depending on your scale you'll need other value.  
+        float dst = 15; //I found that 15 is a good value, though maybe, depending on your scale you'll need other value.  
         float dst2 = dst * dst;
         for (int i = 0; i < dataSet.Length; ++i)
         {
